@@ -4,7 +4,7 @@ use byteorder::{ReadBytesExt, LittleEndian};
 
 /// All this uncompress code
 /// Are directly inspired from the source code
-/// of rdesktop and diretly port to rust
+/// of rdesktop and directly port to rust
 /// Need a little bit of refactoring for rust
 
 fn process_plane(input: &mut dyn Read, width: u32, height: u32, output: &mut [u8]) -> RdpResult<()> {
