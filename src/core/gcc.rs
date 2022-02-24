@@ -254,7 +254,7 @@ pub fn server_core_data() -> Component{
     ]
 }
 
-/// Client security releated to deprecated RDP security layer
+/// Client security related to deprecated RDP security layer
 /// https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/6b58e11e-a32b-4903-b736-339f3cfe46ec?redirectedfrom=MSDN
 pub fn client_security_data() -> Component {
     component![
