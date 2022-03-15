@@ -24,9 +24,9 @@ impl From<&str> for KeyboardLayout {
 pub struct RdpClient<S> {
     /// Multi channel
     /// This is the main switch layer of the protocol
-    mcs: mcs::Client<S>,
+    pub mcs: mcs::Client<S>,
     /// Global channel that implement the basic layer
-    global: global::Client
+    pub global: global::Client
 }
 
 impl<S: Read + Write> RdpClient<S> {
