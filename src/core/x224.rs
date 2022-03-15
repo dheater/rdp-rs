@@ -126,7 +126,7 @@ impl<S: Read + Write> Client<S> {
         }
     }
 
-    /// Send a new x224 formated message
+    /// Send a new x224 formatted message
     /// using the underlying layer
     ///
     ///  # Example

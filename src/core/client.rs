@@ -31,7 +31,7 @@ pub struct RdpClient<S> {
 
 impl<S: Read + Write> RdpClient<S> {
     /// Read a payload from the server
-    /// RDpClient use a callback pattern that can be called more than once
+    /// RdpClient use a callback pattern that can be called more than once
     /// during a read call
     ///
     /// # Example

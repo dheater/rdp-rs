@@ -29,7 +29,7 @@ pub enum RdpErrorKind {
     /// are based on Message trait
     /// To retrieve the original data we used
     /// a visitor pattern. If the expected
-    /// type is not found an InvalidCast error is emited
+    /// type is not found an InvalidCast error is emitted
     InvalidCast,
     /// If an expected value is not equal
     InvalidConst,
