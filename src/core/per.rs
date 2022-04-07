@@ -206,7 +206,7 @@ pub fn read_integer(s: &mut dyn Read) -> RdpResult<u32> {
             result.read(s)?;
             Ok(result.inner() as u32)
         },
-        _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize, "PER integer encoded with an invalid size")))
+        _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize)))
     }
 }
 
@@ -287,12 +287,12 @@ pub fn write_integer_16(integer: u16, minimum: u16, s: &mut dyn Write) -> RdpRes
 /// ```
 pub fn read_object_identifier(oid: &[u8], s: &mut dyn Read) -> RdpResult<bool> {
     if oid.len() != 6 {
-        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize, "Oid to check have an invalid size")));
+        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize)));
     }
 
     let length = read_length(s)?;
     if length != 5 {
-        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize, "Oid source have an invalid size")));
+        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize)));
     }
 
     let mut oid_parsed = [0; 6];
@@ -325,7 +325,7 @@ pub fn read_object_identifier(oid: &[u8], s: &mut dyn Read) -> RdpResult<bool> {
 /// ```
 pub fn write_object_identifier(oid: &[u8], s: &mut dyn Write) ->RdpResult<()> {
     if oid.len() != 6 {
-        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize, "PER: oid source don't have the correct size")))
+        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize)))
     }
 
     trame![
@@ -404,13 +404,13 @@ pub fn write_padding(length: usize, s: &mut dyn Write) -> RdpResult<()> {
 pub fn read_octet_stream(octet_stream: &[u8], minimum: usize, s: &mut dyn Read) -> RdpResult<()> {
     let length = read_length(s)? as usize + minimum;
     if length != octet_stream.len() {
-        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize, "PER: source octet string have an invalid size")));
+        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize)));
     }
     for i in 0..length {
         let mut c: u8 = 0;
         c.read(s)?;
         if c != octet_stream[i] {
-            return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData, "PER: source octet string have an invalid char")));
+            return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData)));
         }
     }
 

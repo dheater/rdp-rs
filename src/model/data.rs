@@ -69,7 +69,7 @@ pub enum DataType<'a> {
 macro_rules! cast {
     ($ident:path, $expr:expr) => (match $expr.visit() {
         $ident(e) => Ok(e),
-        _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidCast, "Invalid Cast")))
+        _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidCast)))
     })
 }
 
@@ -764,7 +764,7 @@ impl<T: Message + Clone + PartialEq> Message for Check<T> {
         let old = self.value.clone();
         self.value.read(reader)?;
         if old != self.value {
-            return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidConst, "Invalid constness of data")))
+            return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidConst)))
         }
         Ok(())
     }

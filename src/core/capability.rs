@@ -93,7 +93,7 @@ impl Capability {
             CapabilitySetType::CapstypeSound => ts_sound_capability_set(),
             CapabilitySetType::CapsettypeMultifragmentupdate => ts_multifragment_update_capability_ts(),
             _ => {
-                return Err(Error::RdpError(RdpError::new(RdpErrorKind::Unknown, &format!("CAPABILITY: Unknown capability {:?}", cap_type))))
+                return Err(Error::RdpError(RdpError::new(RdpErrorKind::Unknown)))
             }
         };
         capability.message.read(&mut Cursor::new(cast!(DataType::Slice, capability_set["capabilitySet"])?))?;

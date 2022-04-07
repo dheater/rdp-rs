@@ -1,7 +1,8 @@
-use crate::model::link::{Link};
+use std::io::{Cursor, Write, Read};
+
 use crate::model::data::{Message, U16, Component, Trame};
 use crate::model::error::{RdpResult, RdpError, RdpErrorKind, Error};
-use std::io::{Cursor, Write, Read};
+use crate::model::link::{Link};
 use crate::nla::cssp::cssp_connect;
 use crate::nla::sspi::AuthenticationProtocol;
 
@@ -139,7 +140,7 @@ impl<S: Read + Write> Client<S> {
             // Minimal size must be 7
             // https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/18a27ef9-6f9a-4501-b000-94b1fe3c2c10
             if size.inner() < 4 {
-                Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize, "Invalid minimal size for TPKT")))
+                Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize)))
             }
             else {
                 // now wait for body
@@ -156,14 +157,14 @@ impl<S: Read + Write> Client<S> {
                 let length: u16 = ((short_length & !0x80) as u16) << 8;
                 let length = length | hi_length as u16;
                 if length < 3 {
-                    Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize, "Invalid minimal size for TPKT")))
+                    Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize)))
                 } else {
                     Ok(Payload::FastPath(sec_flag, Cursor::new(self.transport.read(length as usize - 3)?)))
                 }
             }
             else {
                 if short_length < 2 {
-                    Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize, "Invalid minimal size for TPKT")))
+                    Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize)))
                 } else {
                     Ok(Payload::FastPath(sec_flag, Cursor::new(self.transport.read(short_length as usize - 2)?)))
                 }

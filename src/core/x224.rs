@@ -211,7 +211,7 @@ impl<S: Read + Write> Client<S> {
             Protocols::ProtocolHybrid => Ok(Client::new(tpkt.start_nla(check_certificate, authentication_protocol.unwrap(), restricted_admin_mode || blank_creds)?,Protocols::ProtocolHybrid)),
             Protocols::ProtocolSSL => Ok(Client::new(tpkt.start_ssl(check_certificate)?, Protocols::ProtocolSSL)),
             Protocols::ProtocolRDP => Ok(Client::new(tpkt, Protocols::ProtocolRDP)),
-            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidProtocol, "Security protocol not handled")))
+            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidProtocol)))
         }
     }
 
@@ -239,8 +239,8 @@ impl<S: Read + Write> Client<S> {
         let nego = cast!(DataType::Component, confirm["negotiation"]).unwrap();
 
         match NegotiationType::try_from(cast!(DataType::U8, nego["type"])?)? {
-            NegotiationType::TypeRDPNegFailure => Err(Error::RdpError(RdpError::new(RdpErrorKind::ProtocolNegFailure, "Error during negotiation step"))),
-            NegotiationType::TypeRDPNegReq => Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidAutomata, "Server reject security protocols"))),
+            NegotiationType::TypeRDPNegFailure => Err(Error::RdpError(RdpError::new(RdpErrorKind::ProtocolNegFailure))),
+            NegotiationType::TypeRDPNegReq => Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidAutomata))),
             NegotiationType::TypeRDPNegRsp => Ok(Protocols::try_from(cast!(DataType::U32, nego["result"])?)?)
         }
     }

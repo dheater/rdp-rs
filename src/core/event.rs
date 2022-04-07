@@ -98,7 +98,7 @@ impl BitmapEvent {
 
                 Ok(rgb565torgb32(&result_16bpp, self.width as usize, self.height as usize))
             },
-            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented, &format!("Decompression Algorithm not implemented for bpp {}", self.bpp))))
+            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented)))
         }
     }
 }

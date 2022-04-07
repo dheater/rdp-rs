@@ -719,7 +719,7 @@ impl GenericSecurityService for NTLMv2SecurityInterface {
         let computed_checksum = hmac_md5(&self.verify_key, &[seq_num, plaintext_payload.clone()].concat());
 
         if plaintext_checksum.as_slice() != &(computed_checksum[0..8]) {
-            return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidChecksum, "Invalid checksum on NTLMv2")))
+            return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidChecksum)))
         }
         Ok(plaintext_payload)
     }

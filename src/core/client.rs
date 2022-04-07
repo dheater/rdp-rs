@@ -1,14 +1,15 @@
-use crate::core::x224;
-use crate::core::gcc::KeyboardLayout;
-use crate::core::mcs;
-use crate::core::tpkt;
-use crate::core::sec;
-use crate::core::global;
 use std::io::{Read, Write};
+
+use crate::core::event::{RdpEvent, PointerButton};
+use crate::core::gcc::KeyboardLayout;
+use crate::core::global::{ts_pointer_event, PointerFlag, ts_keyboard_event, KeyboardFlag};
+use crate::core::global;
+use crate::core::mcs;
+use crate::core::sec;
+use crate::core::tpkt;
+use crate::core::x224;
 use crate::model::error::{RdpResult, Error, RdpError, RdpErrorKind};
 use crate::model::link::{Link, Stream};
-use crate::core::event::{RdpEvent, PointerButton};
-use crate::core::global::{ts_pointer_event, PointerFlag, ts_keyboard_event, KeyboardFlag};
 use crate::nla::ntlm::Ntlm;
 
 impl From<&str> for KeyboardLayout {
@@ -59,7 +60,7 @@ impl<S: Read + Write> RdpClient<S> {
         let (channel_name, message) = self.mcs.read()?;
         match channel_name.as_str() {
             "global" => self.global.read(message, &mut self.mcs, callback),
-            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType, &format!("Invalid channel name {:?}", channel_name))))
+            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType)))
         }
     }
 
@@ -116,7 +117,7 @@ impl<S: Read + Write> RdpClient<S> {
                 }
                 self.global.write_input_event(ts_keyboard_event(Some(flags), Some(key.code)), &mut self.mcs)
             }
-            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType, "RDPCLIENT: This event can't be sent")))
+            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType)))
         }
     }
 

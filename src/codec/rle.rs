@@ -99,7 +99,7 @@ pub fn rle_32_decompress(input: &[u8], width: u32, height: u32, output: &mut [u8
     let mut input_cursor = Cursor::new(input);
 
 	if input_cursor.read_u8()? != 0x10 {
-		return Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType, "Bad header")))
+		return Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType)))
 	}
 
 	process_plane(&mut input_cursor, width, height, &mut output[3..])?;
@@ -228,7 +228,7 @@ pub fn rle_16_decompress(input: &[u8], width: usize, mut height: usize, output: 
 		while count > 0 {
 			if x >= width {
 				if height <= 0 {
-					return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData, "error during decompress")))
+					return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData)))
 				}
 				x = 0;
 				height -= 1;

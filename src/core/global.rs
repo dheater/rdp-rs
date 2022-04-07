@@ -46,7 +46,7 @@ impl PDU {
             PDUType::PdutypeDatapdu => share_data_header(None, None, None),
             PDUType::PdutypeConfirmactivepdu => ts_confirm_active_pdu(None, None, None),
             PDUType::PdutypeDeactivateallpdu => ts_deactivate_all_pdu(),
-            _ => return Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented, "GLOBAL: PDU not implemented")))
+            _ => return Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented)))
         };
         pdu.message.read(&mut Cursor::new(cast!(DataType::Slice, control["pduMessage"])?))?;
         Ok(pdu)
@@ -190,7 +190,7 @@ impl DataPDU {
             PDUType2::Pdutype2Fontlist => ts_font_list_pdu(),
             PDUType2::Pdutype2Fontmap => ts_font_map_pdu(),
             PDUType2::Pdutype2SetErrorInfoPdu => ts_set_error_info_pdu(),
-            _ => return Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented, &format!("GLOBAL: Data PDU parsing not implemented {:?}", pdu_type))))
+            _ => return Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented)))
         };
         result.message.read(&mut Cursor::new(cast!(DataType::Slice, data_pdu.message["payload"])?))?;
         Ok(result)
@@ -417,7 +417,7 @@ impl FastPathUpdate {
             FastPathUpdateType::FastpathUpdatetypeColor => ts_colorpointerattribute(),
             FastPathUpdateType::FastpathUpdatetypeSynchronize => ts_fp_update_synchronize(),
             FastPathUpdateType::FastpathUpdatetypePtrNull => ts_fp_systempointerhiddenattribute(),
-            _ => return Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented, &format!("GLOBAL: Fast Path parsing not implemented {:?}", fp_update_type))))
+            _ => return Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented)))
         };
         result.message.read(&mut Cursor::new(cast!(DataType::Slice, fast_path["updateData"])?))?;
         Ok(result)
@@ -635,7 +635,7 @@ impl Client {
         }
 
         if cast!(DataType::U16,  data_pdu.message["action"])? != action as u16 {
-            return Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType, "GLOBAL: bad message type")))
+            return Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType)))
         }
 
         Ok(true)
@@ -800,7 +800,7 @@ impl Client {
     pub fn write_input_event<S: Read + Write>(&self, event: TSInputEvent, mcs: &mut mcs::Client<S>) -> RdpResult<()> {
         match self.state {
             ClientState::Data => Ok(self.write_data_pdu(ts_input_pdu_data(Some(Array::from_trame(trame![ts_input_event(Some(event.event_type), Some(to_vec(&event.message)))]))), mcs)?),
-            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidAutomata, "You cannot send data once it's not connected")))
+            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidAutomata)))
         }
     }
 

@@ -78,12 +78,12 @@ fn read_attach_user_confirm(buffer: &mut dyn Read) -> RdpResult<u16> {
     let mut confirm = trame![0 as u8, Vec::<u8>::new()];
     confirm.read(buffer)?;
     if cast!(DataType::U8, confirm[0])? >> 2 != mcs_pdu_header(Some(DomainMCSPDU::AttachUserConfirm), None) >> 2 {
-        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData, "MCS: unexpected header on recv_attach_user_confirm")));
+        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData)));
     }
 
     let mut request = Cursor::new(cast!(DataType::Slice, confirm[1])?);
     if per::read_enumerates(&mut request)? != 0 {
-        return Err(Error::RdpError(RdpError::new(RdpErrorKind::RejectedByServer, "MCS: recv_attach_user_confirm user rejected by server")));
+        return Err(Error::RdpError(RdpError::new(RdpErrorKind::RejectedByServer)));
     }
     Ok(per::read_integer_16(1001, &mut request)?)
 }
@@ -136,7 +136,7 @@ fn read_channel_join_confirm(user_id: u16, channel_id: u16, buffer: &mut dyn Rea
     let mut confirm = trame![0 as u8, Vec::<u8>::new()];
     confirm.read(buffer)?;
     if cast!(DataType::U8, confirm[0])? >> 2 != mcs_pdu_header(Some(DomainMCSPDU::ChannelJoinConfirm), None) >> 2 {
-        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData, "MCS: unexpected header on read_channel_join_confirm")));
+        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData)));
     }
 
     let mut request = Cursor::new(cast!(DataType::Slice, confirm[1])?);
@@ -145,11 +145,11 @@ fn read_channel_join_confirm(user_id: u16, channel_id: u16, buffer: &mut dyn Rea
     let confirm_channel_id = per::read_integer_16(0, &mut request)?;
 
     if user_id != confirm_user_id {
-        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData, "MCS: read_channel_join_confirm invalid user id")));
+        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData)));
     }
 
     if channel_id != confirm_channel_id {
-        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData, "MCS: read_channel_join_confirm invalid channel_id")));
+        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData)));
     }
 
     Ok(confirm == 0)
@@ -200,7 +200,7 @@ impl<S: Read + Write> Client<S> {
         self.x224.write(to_der(&connect_initial(Some(conference))))
     }
 
-    /// Read a connect response comming from server to client
+    /// Read a connect response coming from server to client
     fn read_connect_response(&mut self) -> RdpResult<()> {
         // Now read response from the server
         let mut connect_response = connect_response(None);
@@ -290,18 +290,18 @@ impl<S: Read + Write> Client<S> {
                  let mut header = mcs_pdu_header(None, None);
                 header.read(&mut payload)?;
                 if header >> 2 == DomainMCSPDU::DisconnectProviderUltimatum as u8 {
-                    return Err(Error::RdpError(RdpError::new(RdpErrorKind::Disconnect, "MCS: Disconnect Provider Ultimatum")));
+                    return Err(Error::RdpError(RdpError::new(RdpErrorKind::Disconnect)));
                 }
 
                 if header >> 2 != DomainMCSPDU::SendDataIndication as u8 {
-                    return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData, "MCS: Invalid opcode")));
+                    return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData)));
                 }
 
                 // Server user id
                 per::read_integer_16(1001, &mut payload)?;
 
                 let channel_id = per::read_integer_16(0, &mut payload)?;
-                let channel = self.channel_ids.iter().find(|x| *x.1 == channel_id).ok_or(Error::RdpError(RdpError::new(RdpErrorKind::Unknown, "MCS: unknown channel")))?;
+                let channel = self.channel_ids.iter().find(|x| *x.1 == channel_id).ok_or(Error::RdpError(RdpError::new(RdpErrorKind::Unknown)))?;
 
                 per::read_enumerates(&mut payload)?;
                 per::read_length(&mut payload)?;
