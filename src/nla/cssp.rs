@@ -1,6 +1,7 @@
 use num_bigint::{BigUint};
 use std::io::{Read, Write};
-use x509_parser::{parse_x509_der, X509Certificate};
+use x509_parser::parse_x509_der;
+use x509_parser::certificate::X509Certificate;
 use yasna::Tag;
 
 use crate::model::error::{RdpError, RdpErrorKind, Error, RdpResult};
