@@ -3,9 +3,8 @@ use crate::model::data::{Message, Component, U16, U32, Trame, DynOption, Check, 
 use std::io::{Cursor};
 use crate::model::error::{RdpResult, RdpError, RdpErrorKind, Error};
 use std::collections::HashMap;
-use md4::{Md4, Digest};
 use hmac::{Hmac, Mac};
-use md5::{Md5};
+use md5::Md5;
 use crate::model::rnd::{random};
 use crate::nla::rc4::{Rc4};
 use num_enum::TryFromPrimitive;
@@ -119,7 +118,7 @@ fn challenge_message() -> Component {
 /// This function create a new authenticate message
 ///
 /// Due to Microsoft spec if you have to compute MIC you need
-/// separatly the packet and the payload
+/// separately the packet and the payload
 fn authenticate_message(lm_challenge_response: &[u8], nt_challenge_response:&[u8], domain: &[u8], user: &[u8], workstation: &[u8], encrypted_random_session_key: &[u8], flags: u32) -> (Component, Vec<u8>) {
     let payload = [lm_challenge_response.to_vec(), nt_challenge_response.to_vec(), domain.to_vec(), user.to_vec(), workstation.to_vec(), encrypted_random_session_key.to_vec()].concat();
     let offset = if flags & (Negotiate::NtlmsspNegociateVersion as u32) == 0 {
@@ -263,9 +262,11 @@ fn z(m: usize) -> Vec<u8> {
 /// let hash = md4(b"foo");
 /// ```
 fn md4(data: &[u8]) -> Vec<u8> {
+    use md4::{Md4, Digest};
+
     let mut hasher = Md4::new();
-    hasher.input(data);
-    hasher.result().to_vec()
+    hasher.update(data);
+    hasher.finalize().to_vec()
 }
 
 /// Compute the MD5 Hash of input vector
@@ -278,9 +279,11 @@ fn md4(data: &[u8]) -> Vec<u8> {
 /// let hash = md((b"foo");
 /// ```
 fn md5(data: &[u8]) -> Vec<u8> {
+    use md5::Digest;
+
     let mut hasher = Md5::new();
-    hasher.input(data);
-    hasher.result().to_vec()
+    hasher.update(data);
+    hasher.finalize().to_vec()
 }
 
 /// Encode a string into utf-16le
@@ -310,9 +313,9 @@ fn unicode(data: &String) -> Vec<u8> {
 /// let signature = hmac_md5(b"foo", b"bar");
 /// ```
 fn hmac_md5(key: &[u8], data: &[u8]) -> Vec<u8> {
-    let mut stream = Hmac::<Md5>::new_varkey(key).unwrap();
-    stream.input(data);
-    stream.result().code().to_vec()
+    let mut mac = Hmac::<md5::Md5>::new_from_slice(key).unwrap();
+    mac.update(data);
+    mac.finalize().into_bytes().to_vec()
 }
 
 /// This function is used to compute init key of another hmac_md5

@@ -1,6 +1,6 @@
 use num_bigint::{BigUint};
 use std::io::{Read, Write};
-use x509_parser::parse_x509_der;
+use x509_parser::parse_x509_certificate;
 use x509_parser::certificate::X509Certificate;
 use yasna::Tag;
 
@@ -102,7 +102,7 @@ pub fn create_ts_authenticate(nego: Vec<u8>, pub_key_auth: Vec<u8>) -> Vec<u8> {
 }
 
 pub fn read_public_certificate(stream: &[u8]) -> RdpResult<X509Certificate> {
-    let res = parse_x509_der(stream).unwrap();
+    let res = parse_x509_certificate(stream).unwrap();
     Ok(res.1)
 }
 

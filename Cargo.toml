@@ -30,10 +30,10 @@ with-serde = ["serde"]
 [dependencies]
 bufstream = "0.1"
 byteorder = "1.4"
-hmac = "0.7"
+hmac = "0.12"
 indexmap = "1.8"
-md-5 = "^0.8"
-md4 = "^0.8"
+md-5 = "0.10"
+md4 = "0.10"
 native-tls = "0.2"
 num-bigint = "0.4"
 num_enum = "0.5"
