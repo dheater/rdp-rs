@@ -471,7 +471,7 @@ impl ASN1 for Integer {
         Ok(())
     }
 
-    /// Allow to cast a ASN1 node into Interger
+    /// Allow to cast a ASN1 node into Integer
     ///
     /// # Example
     /// ```
