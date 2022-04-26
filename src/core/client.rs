@@ -2,7 +2,8 @@ use std::io::{Read, Write};
 
 use crate::core::event::{RdpEvent, PointerButton};
 use crate::core::gcc::KeyboardLayout;
-use crate::core::global::{ts_pointer_event, PointerFlag, ts_keyboard_event, KeyboardFlag};
+use crate::core::global::InputEventType::{InputEventScancode, InputEventUnicode};
+use crate::core::global::{ts_pointer_event, PointerFlag, ts_keyboard_event};
 use crate::core::global;
 use crate::core::mcs;
 use crate::core::sec;
@@ -109,13 +110,13 @@ impl<S: Read + Write> RdpClient<S> {
 
                 self.global.write_input_event(ts_pointer_event(Some(flags), Some(pointer.x), Some(pointer.y)), &mut self.mcs)
             },
-            // Raw keyboard input
-            RdpEvent::Key(key) => {
-                let mut flags: u16 = 0;
-                if !key.down {
-                    flags |= KeyboardFlag::KbdflagsRelease as u16;
-                }
-                self.global.write_input_event(ts_keyboard_event(Some(flags), Some(key.code)), &mut self.mcs)
+            // ScanCode keyboard input
+            RdpEvent::ScanCode(key) => {
+                self.global.write_input_event(ts_keyboard_event(Some(key.flags), Some(key.code), InputEventScancode), &mut self.mcs)
+            }
+            // Unicode keyboard input
+            RdpEvent::Unicode(key) => {
+                self.global.write_input_event(ts_keyboard_event(Some(key.flags), Some(key.code), InputEventUnicode), &mut self.mcs)
             }
             _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType)))
         }

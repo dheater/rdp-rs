@@ -346,18 +346,11 @@ pub fn ts_pointer_event(flags: Option<u16>, x: Option<u16>, y: Option<u16>) -> T
     }
 }
 
-#[repr(u16)]
-pub enum KeyboardFlag {
-    KbdflagsExtended = 0x0100,
-    KbdflagsDown = 0x4000,
-    KbdflagsRelease = 0x8000
-}
-
 /// Raw input keyboard event
 /// Use to send scancode directly
-pub fn ts_keyboard_event(flags: Option<u16>, key_code: Option<u16>) -> TSInputEvent {
+pub fn ts_keyboard_event(flags: Option<u16>, key_code: Option<u16>, event_type: InputEventType) -> TSInputEvent {
     TSInputEvent {
-        event_type: InputEventType::InputEventScancode,
+        event_type,
         message: component![
             "keyboardFlags" => U16::LE(flags.unwrap_or(0)),
             "keyCode" => U16::LE(key_code.unwrap_or(0)),
@@ -691,7 +684,7 @@ impl Client {
     }
 
     /// Read fast path input data
-    /// Reading is processed using a callback patterm
+    /// Reading is processed using a callback pattern
     /// This is where bitmap are received
     fn read_fast_path<T>(&mut self, stream: &mut dyn Read, mut callback: T) -> RdpResult<()>
     where T: FnMut(RdpEvent) {

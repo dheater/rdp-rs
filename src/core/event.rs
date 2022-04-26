@@ -135,10 +135,10 @@ pub struct PointerEvent {
 /// to inform which key is pressed
 #[cfg_attr(feature = "with-serde", derive(Deserialize, Serialize))]
 pub struct KeyboardEvent {
+    /// Keyboard flags
+    pub flags: u16,
     /// Scancode of the key
     pub code: u16,
-    /// State of the key
-    pub down: bool
 }
 
 /// All event handle by RDP protocol implemented by rdp-rs
@@ -148,6 +148,8 @@ pub enum RdpEvent {
     Bitmap(BitmapEvent),
     /// Mouse event
     Pointer(PointerEvent),
-    /// Keyboard event
-    Key(KeyboardEvent)
+    /// Keyboard ScanCode event
+    ScanCode(KeyboardEvent),
+    /// Keyboard ScanCode event
+    Unicode(KeyboardEvent),
 }
