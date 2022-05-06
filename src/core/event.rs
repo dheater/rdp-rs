@@ -12,6 +12,7 @@ use crate::model::error::{RdpResult, Error, RdpError, RdpErrorKind};
 /// If bitmap is compress you can use the
 /// decompress function to handle it
 #[cfg_attr(feature = "with-serde", derive(Deserialize, Serialize))]
+#[derive(Debug)]
 pub struct BitmapEvent {
     /// Pixel position from left of the left top angle
     pub dest_left: u16,
@@ -32,7 +33,7 @@ pub struct BitmapEvent {
     /// true if bitmap buffer is compressed using RLE
     pub is_compress: bool,
     /// Bitmap data
-    pub data: Vec<u8>
+    pub data: Vec<u8>,
 }
 
 impl BitmapEvent {
@@ -104,7 +105,7 @@ impl BitmapEvent {
 }
 
 #[repr(u8)]
-#[derive(Eq, PartialEq, TryFromPrimitive, Copy, Clone)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive, Copy, Clone)]
 #[cfg_attr(feature = "with-serde", derive(Deserialize, Serialize))]
 pub enum PointerButton {
     /// No button but a move
@@ -114,11 +115,12 @@ pub enum PointerButton {
     /// Right mouse button
     Right = 2,
     /// Wheel mouse button
-    Middle = 3
+    Middle = 3,
 }
 
 /// A mouse pointer event
 #[cfg_attr(feature = "with-serde", derive(Deserialize, Serialize))]
+#[derive(Debug)]
 pub struct PointerEvent {
     /// horizontal position from top left angle of the window
     pub x: u16,
@@ -127,13 +129,14 @@ pub struct PointerEvent {
     /// Which button is pressed
     pub button: PointerButton,
     /// true if it's a down press action
-    pub down: bool
+    pub down: bool,
 }
 
 /// Keyboard event
 /// It's a raw event using Scancode
 /// to inform which key is pressed
 #[cfg_attr(feature = "with-serde", derive(Deserialize, Serialize))]
+#[derive(Debug)]
 pub struct KeyboardEvent {
     /// Keyboard flags
     pub flags: u16,
@@ -142,7 +145,8 @@ pub struct KeyboardEvent {
 }
 
 /// All event handle by RDP protocol implemented by rdp-rs
-#[cfg_attr(feature = "with-serde", derive(Deserialize, Serialize), serde(untagged))]
+#[cfg_attr(feature = "with-serde", derive(Deserialize, Serialize))]
+#[derive(Debug)]
 pub enum RdpEvent {
     /// Classic bitmap event
     Bitmap(BitmapEvent),
