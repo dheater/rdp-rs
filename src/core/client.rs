@@ -1,15 +1,17 @@
-use core::x224;
-use core::gcc::KeyboardLayout;
-use core::mcs;
-use core::tpkt;
-use core::sec;
-use core::global;
 use std::io::{Read, Write};
-use model::error::{RdpResult, Error, RdpError, RdpErrorKind};
-use model::link::{Link, Stream};
-use core::event::{RdpEvent, PointerButton};
-use core::global::{ts_pointer_event, PointerFlag, ts_keyboard_event, KeyboardFlag};
-use nla::ntlm::Ntlm;
+
+use crate::core::event::{RdpEvent, PointerButton};
+use crate::core::gcc::KeyboardLayout;
+use crate::core::global::InputEventType::{InputEventScancode, InputEventUnicode};
+use crate::core::global::{ts_pointer_event, PointerFlag, ts_keyboard_event};
+use crate::core::global;
+use crate::core::mcs;
+use crate::core::sec;
+use crate::core::tpkt;
+use crate::core::x224;
+use crate::model::error::{RdpResult, Error, RdpError, RdpErrorKind};
+use crate::model::link::{Link, Stream};
+use crate::nla::ntlm::Ntlm;
 
 impl From<&str> for KeyboardLayout {
     fn from(e: &str) -> Self {
@@ -24,14 +26,14 @@ impl From<&str> for KeyboardLayout {
 pub struct RdpClient<S> {
     /// Multi channel
     /// This is the main switch layer of the protocol
-    mcs: mcs::Client<S>,
+    pub mcs: mcs::Client<S>,
     /// Global channel that implement the basic layer
-    global: global::Client
+    pub global: global::Client
 }
 
 impl<S: Read + Write> RdpClient<S> {
     /// Read a payload from the server
-    /// RDpClient use a callback pattern that can be called more than once
+    /// RdpClient use a callback pattern that can be called more than once
     /// during a read call
     ///
     /// # Example
@@ -59,7 +61,7 @@ impl<S: Read + Write> RdpClient<S> {
         let (channel_name, message) = self.mcs.read()?;
         match channel_name.as_str() {
             "global" => self.global.read(message, &mut self.mcs, callback),
-            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType, &format!("Invalid channel name {:?}", channel_name))))
+            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType)))
         }
     }
 
@@ -108,15 +110,15 @@ impl<S: Read + Write> RdpClient<S> {
 
                 self.global.write_input_event(ts_pointer_event(Some(flags), Some(pointer.x), Some(pointer.y)), &mut self.mcs)
             },
-            // Raw keyboard input
-            RdpEvent::Key(key) => {
-                let mut flags: u16 = 0;
-                if !key.down {
-                    flags |= KeyboardFlag::KbdflagsRelease as u16;
-                }
-                self.global.write_input_event(ts_keyboard_event(Some(flags), Some(key.code)), &mut self.mcs)
+            // ScanCode keyboard input
+            RdpEvent::ScanCode(key) => {
+                self.global.write_input_event(ts_keyboard_event(Some(key.flags), Some(key.code), InputEventScancode), &mut self.mcs)
             }
-            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType, "RDPCLIENT: This event can't be sent")))
+            // Unicode keyboard input
+            RdpEvent::Unicode(key) => {
+                self.global.write_input_event(ts_keyboard_event(Some(key.flags), Some(key.code), InputEventUnicode), &mut self.mcs)
+            }
+            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType)))
         }
     }
 

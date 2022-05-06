@@ -1,12 +1,12 @@
-use core::mcs;
-use core::license;
-use core::tpkt;
-use model::error::{RdpResult, Error, RdpError, RdpErrorKind};
-use model::data::{Message, Component, U16, U32, DynOption, MessageOption, Trame, DataType};
+use crate::core::mcs;
+use crate::core::license;
+use crate::core::tpkt;
+use crate::model::error::{RdpResult, Error, RdpError, RdpErrorKind};
+use crate::model::data::{Message, Component, U16, U32, DynOption, MessageOption, Trame, DataType};
 use std::io::{Write, Read};
-use model::unicode::Unicode;
+use crate::model::unicode::Unicode;
 
-/// Security flag send as header flage in core ptotocol
+/// Security flag send as header flag in core protocol
 /// https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/e13405c5-668b-4716-94b2-1c2654ca1ad4?redirectedfrom=MSDN
 #[repr(u16)]
 #[allow(dead_code)]
@@ -157,7 +157,7 @@ pub fn connect<T: Read + Write>(mcs: &mut mcs::Client<T>, domain: &String, usern
     let mut header = security_header();
     header.read(&mut stream)?;
     if cast!(DataType::U16, header["securityFlag"])? & SecurityFlag::SecLicensePkt as u16 == 0 {
-        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData, "SEC: Invalid Licence packet")));
+        return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData)));
     }
 
     license::client_connect(&mut stream)?;

@@ -1,14 +1,14 @@
-use core::mcs;
-use core::tpkt;
+use crate::core::mcs;
+use crate::core::tpkt;
 use std::io::{Read, Write, Cursor};
-use model::error::{RdpResult, Error, RdpErrorKind, RdpError};
-use model::data::{Component, MessageOption, U32, DynOption, U16, DataType, Message, Array, Trame, Check, to_vec};
-use core::event::{RdpEvent, BitmapEvent};
+use crate::model::error::{RdpResult, Error, RdpErrorKind, RdpError};
+use crate::model::data::{Component, MessageOption, U32, DynOption, U16, DataType, Message, Array, Trame, Check, to_vec};
+use crate::core::event::{RdpEvent, BitmapEvent};
 use num_enum::TryFromPrimitive;
 use std::convert::TryFrom;
-use core::capability::{Capability, capability_set};
-use core::capability;
-use core::gcc::KeyboardLayout;
+use crate::core::capability::{Capability, capability_set};
+use crate::core::capability;
+use crate::core::gcc::KeyboardLayout;
 
 
 /// Raw PDU type use by the protocol
@@ -46,7 +46,7 @@ impl PDU {
             PDUType::PdutypeDatapdu => share_data_header(None, None, None),
             PDUType::PdutypeConfirmactivepdu => ts_confirm_active_pdu(None, None, None),
             PDUType::PdutypeDeactivateallpdu => ts_deactivate_all_pdu(),
-            _ => return Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented, "GLOBAL: PDU not implemented")))
+            _ => return Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented)))
         };
         pdu.message.read(&mut Cursor::new(cast!(DataType::Slice, control["pduMessage"])?))?;
         Ok(pdu)
@@ -190,7 +190,7 @@ impl DataPDU {
             PDUType2::Pdutype2Fontlist => ts_font_list_pdu(),
             PDUType2::Pdutype2Fontmap => ts_font_map_pdu(),
             PDUType2::Pdutype2SetErrorInfoPdu => ts_set_error_info_pdu(),
-            _ => return Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented, &format!("GLOBAL: Data PDU parsing not implemented {:?}", pdu_type))))
+            _ => return Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented)))
         };
         result.message.read(&mut Cursor::new(cast!(DataType::Slice, data_pdu.message["payload"])?))?;
         Ok(result)
@@ -346,18 +346,11 @@ pub fn ts_pointer_event(flags: Option<u16>, x: Option<u16>, y: Option<u16>) -> T
     }
 }
 
-#[repr(u16)]
-pub enum KeyboardFlag {
-    KbdflagsExtended = 0x0100,
-    KbdflagsDown = 0x4000,
-    KbdflagsRelease = 0x8000
-}
-
 /// Raw input keyboard event
 /// Use to send scancode directly
-pub fn ts_keyboard_event(flags: Option<u16>, key_code: Option<u16>) -> TSInputEvent {
+pub fn ts_keyboard_event(flags: Option<u16>, key_code: Option<u16>, event_type: InputEventType) -> TSInputEvent {
     TSInputEvent {
-        event_type: InputEventType::InputEventScancode,
+        event_type,
         message: component![
             "keyboardFlags" => U16::LE(flags.unwrap_or(0)),
             "keyCode" => U16::LE(key_code.unwrap_or(0)),
@@ -417,7 +410,7 @@ impl FastPathUpdate {
             FastPathUpdateType::FastpathUpdatetypeColor => ts_colorpointerattribute(),
             FastPathUpdateType::FastpathUpdatetypeSynchronize => ts_fp_update_synchronize(),
             FastPathUpdateType::FastpathUpdatetypePtrNull => ts_fp_systempointerhiddenattribute(),
-            _ => return Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented, &format!("GLOBAL: Fast Path parsing not implemented {:?}", fp_update_type))))
+            _ => return Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented)))
         };
         result.message.read(&mut Cursor::new(cast!(DataType::Slice, fast_path["updateData"])?))?;
         Ok(result)
@@ -635,7 +628,7 @@ impl Client {
         }
 
         if cast!(DataType::U16,  data_pdu.message["action"])? != action as u16 {
-            return Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType, "GLOBAL: bad message type")))
+            return Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType)))
         }
 
         Ok(true)
@@ -691,7 +684,7 @@ impl Client {
     }
 
     /// Read fast path input data
-    /// Reading is processed using a callback patterm
+    /// Reading is processed using a callback pattern
     /// This is where bitmap are received
     fn read_fast_path<T>(&mut self, stream: &mut dyn Read, mut callback: T) -> RdpResult<()>
     where T: FnMut(RdpEvent) {
@@ -800,7 +793,7 @@ impl Client {
     pub fn write_input_event<S: Read + Write>(&self, event: TSInputEvent, mcs: &mut mcs::Client<S>) -> RdpResult<()> {
         match self.state {
             ClientState::Data => Ok(self.write_data_pdu(ts_input_pdu_data(Some(Array::from_trame(trame![ts_input_event(Some(event.event_type), Some(to_vec(&event.message)))]))), mcs)?),
-            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidAutomata, "You cannot send data once it's not connected")))
+            _ => Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidAutomata)))
         }
     }
 

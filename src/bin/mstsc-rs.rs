@@ -94,7 +94,7 @@ fn fast_bitmap_transfer(buffer: &mut Vec<u32>, width: usize, bitmap: BitmapEvent
             let src_i = i * bitmap_width;
             let count = bitmap_dest_right - bitmap_dest_left + 1;
             if dest_i > buffer.len() || dest_i + count > buffer.len() || src_i > data_aligned.len() || src_i + count > data_aligned.len() {
-                return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize, "Image have invalide size")))
+                return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidSize)))
             }
             copy_nonoverlapping(data_aligned.as_ptr().offset((src_i) as isize), buffer.as_mut_ptr().offset(dest_i as isize), count)
         }
@@ -236,11 +236,11 @@ fn tcp_from_args(args: &ArgMatches) -> RdpResult<TcpStream> {
 
     // TCP connection
     let addr = format!("{}:{}", ip, port).parse::<SocketAddr>().map_err( |e| {
-        Error::RdpError(RdpError::new(RdpErrorKind::InvalidData, &format!("Cannot parse the IP PORT input [{}]", e)))
+        Error::RdpError(RdpError::new(RdpErrorKind::InvalidData))
     })?;
     let tcp = TcpStream::connect(&addr).unwrap();
     tcp.set_nodelay(true).map_err(|e| {
-        Error::RdpError(RdpError::new(RdpErrorKind::InvalidData, &format!("Unable to set no delay option [{}]", e)))
+        Error::RdpError(RdpError::new(RdpErrorKind::InvalidData))
     })?;
 
     Ok(tcp)
@@ -250,10 +250,10 @@ fn tcp_from_args(args: &ArgMatches) -> RdpResult<TcpStream> {
 fn rdp_from_args<S: Read + Write>(args: &ArgMatches, stream: S) -> RdpResult<RdpClient<S>> {
 
     let width = args.value_of("width").unwrap_or_default().parse().map_err(|e| {
-        Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType, &format!("Cannot parse the input width argument [{}]", e)))
+        Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType))
     })?;
     let height = args.value_of("height").unwrap_or_default().parse().map_err(|e| {
-        Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType, &format!("Cannot parse the input height argument [{}]", e)))
+        Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType))
     })?;
     let domain = args.value_of("domain").unwrap_or_default();
     let username = args.value_of("username").unwrap_or_default();
@@ -280,7 +280,7 @@ fn rdp_from_args<S: Read + Write>(args: &ArgMatches, stream: S) -> RdpResult<Rdp
 
     if let Some(hash) = ntlm_hash {
         rdp_connector = rdp_connector.set_password_hash(hex::decode(hash).map_err(|e| {
-            Error::RdpError(RdpError::new(RdpErrorKind::InvalidData, &format!("Cannot parse the input hash [{}]", e)))
+            Error::RdpError(RdpError::new(RdpErrorKind::InvalidData))
         })?)
     }
     // RDP connection
@@ -294,10 +294,10 @@ fn rdp_from_args<S: Read + Write>(args: &ArgMatches, stream: S) -> RdpResult<Rdp
 /// RDP protocol
 fn window_from_args(args: &ArgMatches) -> RdpResult<Window> {
     let width = args.value_of("width").unwrap_or_default().parse().map_err(|e| {
-        Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType, &format!("Cannot parse the input width argument [{}]", e)))
+        Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType))
     })?;
     let height = args.value_of("height").unwrap_or_default().parse().map_err(|e| {
-        Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType, &format!("Cannot parse the input height argument [{}]", e)))
+        Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType))
     })?;
 
     let window = Window::new(
@@ -306,7 +306,7 @@ fn window_from_args(args: &ArgMatches) -> RdpResult<Window> {
         height,
         WindowOptions::default(),
     ).map_err(|e| {
-        Error::RdpError(RdpError::new(RdpErrorKind::Unknown, &format!("Unable to create window [{}]", e)))
+        Error::RdpError(RdpError::new(RdpErrorKind::Unknown))
     })?;
 
     Ok(window)
@@ -386,7 +386,7 @@ fn main_gui_loop<S: Read + Write>(
         // Mouse position input
         if let Some((x, y)) = window.get_mouse_pos(MouseMode::Clamp) {
             let mut rdp_client_guard = rdp_client.lock().map_err(|e| {
-                Error::RdpError(RdpError::new(RdpErrorKind::Unknown, &format!("Thread error during access to mutex [{}]", e)))
+                Error::RdpError(RdpError::new(RdpErrorKind::Unknown))
             })?;
 
             // Button is down if not 0
@@ -434,7 +434,7 @@ fn main_gui_loop<S: Read + Write>(
 
         // We unwrap here as we want this code to exit if it fails. Real applications may want to handle this in a different way
         window.update_with_buffer(&buffer, width, height).map_err(|e| {
-            Error::RdpError(RdpError::new(RdpErrorKind::Unknown, &format!("Unable to update screen buffer [{}]", e)))
+            Error::RdpError(RdpError::new(RdpErrorKind::Unknown))
         })?;
     }
 

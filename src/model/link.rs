@@ -1,9 +1,8 @@
-extern crate native_tls;
-
-use model::error::{RdpResult, Error, RdpError, RdpErrorKind};
 use std::io::{Cursor, Read, Write};
-use self::native_tls::{TlsConnector, TlsStream, Certificate};
-use model::data::{Message};
+use native_tls::{Certificate, TlsConnector, TlsStream};
+
+use crate::model::data::{Message};
+use crate::model::error::{RdpResult, Error, RdpError, RdpErrorKind};
 
 /// This a wrapper to work equals
 /// for a stream and a TLS stream
@@ -86,7 +85,7 @@ impl<S: Read + Write> Stream<S> {
 }
 
 /// Link layer is a wrapper around TCP or SSL stream
-/// It can swicth from TCP to SSL
+/// It can switch from TCP to SSL
 pub struct Link<S> {
     stream: Stream<S>
 }
@@ -155,8 +154,7 @@ impl<S: Read + Write> Link<S> {
             let size = self.stream.read(&mut buffer)?;
             buffer.resize(size, 0);
             Ok(buffer)
-        }
-        else {
+        } else {
             let mut buffer = vec![0; expected_size];
             self.stream.read_exact(&mut buffer)?;
             Ok(buffer)
@@ -183,10 +181,10 @@ impl<S: Read + Write> Link<S> {
         if let Stream::Raw(stream) = self.stream {
             return Ok(Link::new(Stream::Ssl(connector.connect("", stream)?)))
         }
-        Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented, "start_ssl on ssl stream is forbidden")))
+        Err(Error::RdpError(RdpError::new(RdpErrorKind::NotImplemented)))
     }
 
-    /// Retrive the peer certificate
+    /// Retrieve the peer certificate
     /// Use by the NLA authentication protocol
     /// to avoid MITM attack
     /// # Example
@@ -201,9 +199,8 @@ impl<S: Read + Write> Link<S> {
     pub fn get_peer_certificate(&self) -> RdpResult<Option<Certificate>> {
         if let Stream::Ssl(stream) = &self.stream {
             Ok(stream.peer_certificate()?)
-        }
-        else {
-            Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData, "get peer certificate on non ssl link is impossible")))
+        } else {
+            Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData)))
         }
     }
 

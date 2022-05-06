@@ -1,10 +1,10 @@
-use model::error::{RdpResult, Error, RdpError, RdpErrorKind};
+use crate::model::error::{RdpResult, Error, RdpError, RdpErrorKind};
 use std::io::{Cursor, Read};
 use byteorder::{ReadBytesExt, LittleEndian};
 
 /// All this uncompress code
 /// Are directly inspired from the source code
-/// of rdesktop and diretly port to rust
+/// of rdesktop and directly port to rust
 /// Need a little bit of refactoring for rust
 
 fn process_plane(input: &mut dyn Read, width: u32, height: u32, output: &mut [u8]) -> RdpResult<()> {
@@ -99,7 +99,7 @@ pub fn rle_32_decompress(input: &[u8], width: u32, height: u32, output: &mut [u8
     let mut input_cursor = Cursor::new(input);
 
 	if input_cursor.read_u8()? != 0x10 {
-		return Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType, "Bad header")))
+		return Err(Error::RdpError(RdpError::new(RdpErrorKind::UnexpectedType)))
 	}
 
 	process_plane(&mut input_cursor, width, height, &mut output[3..])?;
@@ -228,7 +228,7 @@ pub fn rle_16_decompress(input: &[u8], width: usize, mut height: usize, output: 
 		while count > 0 {
 			if x >= width {
 				if height <= 0 {
-					return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData, "error during decompress")))
+					return Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidData)))
 				}
 				x = 0;
 				height -= 1;

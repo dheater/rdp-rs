@@ -1,11 +1,13 @@
-use nla::asn1::{ASN1, Sequence, ExplicitTag, SequenceOf, ASN1Type, OctetString, Integer, to_der};
-use model::error::{RdpError, RdpErrorKind, Error, RdpResult};
 use num_bigint::{BigUint};
-use yasna::Tag;
-use x509_parser::{parse_x509_der, X509Certificate};
-use nla::sspi::AuthenticationProtocol;
-use model::link::Link;
 use std::io::{Read, Write};
+use x509_parser::parse_x509_certificate;
+use x509_parser::certificate::X509Certificate;
+use yasna::Tag;
+
+use crate::model::error::{RdpError, RdpErrorKind, Error, RdpResult};
+use crate::model::link::Link;
+use crate::nla::asn1::{ASN1, Sequence, ExplicitTag, SequenceOf, ASN1Type, OctetString, Integer, to_der};
+use crate::nla::sspi::AuthenticationProtocol;
 
 /// Create a ts request as expected by the specification
 /// https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-cssp/6aac4dea-08ef-47a6-8747-22ea7f6d8685?redirectedfrom=MSDN
@@ -74,7 +76,7 @@ pub fn read_ts_server_challenge(stream: &[u8]) -> RdpResult<Vec<u8>> {
 
 /// This the third step in CSSP Handshake
 /// Send the pubKey of server encoded with negotiated key
-/// to protect agains MITM attack
+/// to protect against MITM attack
 ///
 /// https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-cssp/6aac4dea-08ef-47a6-8747-22ea7f6d8685?redirectedfrom=MSDN
 ///
@@ -100,7 +102,7 @@ pub fn create_ts_authenticate(nego: Vec<u8>, pub_key_auth: Vec<u8>) -> Vec<u8> {
 }
 
 pub fn read_public_certificate(stream: &[u8]) -> RdpResult<X509Certificate> {
-    let res = parse_x509_der(stream).unwrap();
+    let res = parse_x509_certificate(stream).unwrap();
     Ok(res.1)
 }
 
@@ -160,7 +162,7 @@ fn create_ts_authinfo(auth_info: Vec<u8>) -> Vec<u8> {
     to_der(&ts_authinfo)
 }
 
-/// This the main function for CSSP protocol
+/// This is the main function for CSSP protocol
 /// It will use the raw link layer and the selected authenticate protocol
 /// to perform the NLA authenticate
 pub fn cssp_connect<S: Read + Write>(link: &mut Link<S>, authentication_protocol: &mut dyn AuthenticationProtocol, restricted_admin_mode: bool) -> RdpResult<()> {
@@ -190,7 +192,7 @@ pub fn cssp_connect<S: Read + Write>(link: &mut Link<S>, authentication_protocol
 
     // Check possible man in the middle using cssp
     if BigUint::from_bytes_le(&inc_pub_key) != BigUint::from_bytes_le(certificate.tbs_certificate.subject_pki.subject_public_key.data) + BigUint::new(vec![1]) {
-        return Err(Error::RdpError(RdpError::new(RdpErrorKind::PossibleMITM, "Man in the middle detected")))
+        return Err(Error::RdpError(RdpError::new(RdpErrorKind::PossibleMITM)))
     }
 
     // compute the last message with encoded credentials

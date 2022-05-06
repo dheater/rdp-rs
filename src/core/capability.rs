@@ -1,7 +1,7 @@
-use model::data::{Component, U16, U32, DynOption, MessageOption, Message, DataType, Check, Trame, to_vec};
-use model::error::{RdpResult, Error, RdpError, RdpErrorKind};
+use crate::model::data::{Component, U16, U32, DynOption, MessageOption, Message, DataType, Check, Trame, to_vec};
+use crate::model::error::{RdpResult, Error, RdpError, RdpErrorKind};
 use std::io::Cursor;
-use core::gcc::{KeyboardLayout, KeyboardType};
+use crate::core::gcc::{KeyboardLayout, KeyboardType};
 use num_enum::TryFromPrimitive;
 use std::convert::TryFrom;
 
@@ -93,7 +93,7 @@ impl Capability {
             CapabilitySetType::CapstypeSound => ts_sound_capability_set(),
             CapabilitySetType::CapsettypeMultifragmentupdate => ts_multifragment_update_capability_ts(),
             _ => {
-                return Err(Error::RdpError(RdpError::new(RdpErrorKind::Unknown, &format!("CAPABILITY: Unknown capability {:?}", cap_type))))
+                return Err(Error::RdpError(RdpError::new(RdpErrorKind::Unknown)))
             }
         };
         capability.message.read(&mut Cursor::new(cast!(DataType::Slice, capability_set["capabilitySet"])?))?;

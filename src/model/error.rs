@@ -1,12 +1,12 @@
-extern crate native_tls;
-
-use std::io::{Read, Write};
-use std::io::Error as IoError;
-use std::string::String;
-use self::native_tls::HandshakeError;
-use self::native_tls::Error as SslError;
-use yasna::ASN1Error;
 use num_enum::{TryFromPrimitive, TryFromPrimitiveError};
+use self::native_tls::Error as SslError;
+use self::native_tls::HandshakeError;
+use std::io::Error as IoError;
+use std::io::{Read, Write};
+use std::string::String;
+use yasna::ASN1Error;
+
+extern crate native_tls;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum RdpErrorKind {
@@ -29,7 +29,7 @@ pub enum RdpErrorKind {
     /// are based on Message trait
     /// To retrieve the original data we used
     /// a visitor pattern. If the expected
-    /// type is not found an InvalidCast error is emited
+    /// type is not found an InvalidCast error is emitted
     InvalidCast,
     /// If an expected value is not equal
     InvalidConst,
@@ -55,8 +55,6 @@ pub enum RdpErrorKind {
 pub struct RdpError {
     /// Kind of error
     kind: RdpErrorKind,
-    /// Associated message of the context
-    message: String
 }
 
 impl RdpError {
@@ -64,12 +62,11 @@ impl RdpError {
     /// # Example
     /// ```
     /// use rdp::model::error::{RdpError, RdpErrorKind};
-    /// let error = RdpError::new(RdpErrorKind::Disconnect, "disconnected");
+    /// let error = RdpError::new(RdpErrorKind::Disconnect);
     /// ```
-    pub fn new (kind: RdpErrorKind, message: &str) -> Self {
+    pub fn new (kind: RdpErrorKind) -> Self {
         RdpError {
             kind,
-            message: String::from(message)
         }
     }
 
@@ -78,7 +75,7 @@ impl RdpError {
     /// # Example
     /// ```
     /// use rdp::model::error::{RdpError, RdpErrorKind};
-    /// let error = RdpError::new(RdpErrorKind::Disconnect, "disconnected");
+    /// let error = RdpError::new(RdpErrorKind::Disconnect);
     /// assert_eq!(error.kind(), RdpErrorKind::Disconnect)
     /// ```
     pub fn kind(&self) -> RdpErrorKind {
@@ -129,7 +126,7 @@ impl From<ASN1Error> for Error {
 
 impl<T: TryFromPrimitive> From<TryFromPrimitiveError<T>> for Error {
     fn from(_: TryFromPrimitiveError<T>) -> Self {
-        Error::RdpError(RdpError::new(RdpErrorKind::InvalidCast, "Invalid enum conversion"))
+        Error::RdpError(RdpError::new(RdpErrorKind::InvalidCast))
     }
 }
 
@@ -142,7 +139,7 @@ macro_rules! try_option {
          if let Some(x) = $val {
             Ok(x)
          } else {
-            Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidOptionalField, $expr)))
+            Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidOptionalField)))
          }
     }
 }
@@ -153,7 +150,7 @@ macro_rules! try_let {
          if let $ident(x) = $val {
             Ok(x)
          } else {
-            Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidCast, "Invalid Cast")))
+            Err(Error::RdpError(RdpError::new(RdpErrorKind::InvalidCast)))
          }
     }
 }

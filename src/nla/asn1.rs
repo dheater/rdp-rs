@@ -1,5 +1,5 @@
 use yasna::{Tag, DERWriter, BERReader};
-use model::error::{RdpResult, Error};
+use crate::model::error::{RdpResult, Error};
 use indexmap::map::IndexMap;
 
 /// Enum all possible value
@@ -42,7 +42,7 @@ pub struct SequenceOf {
 }
 
 impl SequenceOf {
-    /// Create an empty sequenceof
+    /// Create an empty sequenceOf
     ///
     /// # Example
     /// ```no_run
@@ -74,7 +74,7 @@ impl SequenceOf {
 }
 
 impl ASN1 for SequenceOf {
-    /// Write an ASN1 sequenceof model
+    /// Write an ASN1 sequenceOf model
     /// using a DERWriter
     ///
     /// # Example
@@ -100,7 +100,7 @@ impl ASN1 for SequenceOf {
         Ok(())
     }
 
-    /// Read an ASN1 sequenceof model
+    /// Read an ASN1 sequenceOf model
     /// using a BerReader
     ///
     /// # Example
@@ -471,7 +471,7 @@ impl ASN1 for Integer {
         Ok(())
     }
 
-    /// Allow to cast a ASN1 node into Interger
+    /// Allow to cast a ASN1 node into Integer
     ///
     /// # Example
     /// ```

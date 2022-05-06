@@ -1,14 +1,15 @@
 [package]
 name = "rdp-rs"
-version = "0.1.0"
-authors = ["Sylvain Peyrefitte <citronneur@gmail.com>"]
+version = "0.2.0"
+authors = ["Sylvain Peyrefitte <citronneur@gmail.com>, Daniel Heater <daniel@heatertech.com>"]
 description = "A Pure RUST imlementation of Remote Desktop Protocol"
-repository = "https://github.com/citronneur/rdp-rs"
+repository = "https://github.com/dheater/rdp-rs"
 readme = "README.md"
 keywords = ["rdp", "security", "network", "windows"]
 categories = ["network"]
 license = "MIT"
 documentation = "https://docs.rs/rdp-rs"
+edition = "2018"
 
 [lib]
 name = "rdp"
@@ -24,20 +25,24 @@ required-features = ["mstsc-rs"]
 # See: https://github.com/rust-lang/cargo/issues/4669
 integration = []
 mstsc-rs = ["hex", "winapi", "minifb", "clap", "libc"]
+with-serde = ["serde"]
 
 [dependencies]
-native-tls = "^0.2"
-byteorder = "^1.3"
 bufstream = "0.1"
-indexmap = "^1.3"
-yasna = { version = "^0.3" }
-md4 = "^0.8"
-hmac = "^0.7"
-md-5 = "^0.8"
-rand = "^0.7"
-num-bigint = "^0.2"
-x509-parser = "0.6.5"
-num_enum = "0.4.3"
+byteorder = "1.4"
+hmac = "0.12"
+indexmap = "1.8"
+md-5 = "0.10"
+md4 = "0.10"
+native-tls = "0.2"
+num-bigint = "0.4"
+num_enum = "0.5"
+rand = "0.8"
+x509-parser = "0.13"
+yasna = "0.5"
+
+# serde support
+serde = { version = "^1.0", features = ["derive"], optional = true }
 
 # for mtsc-rs
 hex = { version = "^0.4", optional = true }

@@ -1,7 +1,7 @@
-use model::data::{Component, U32, U16, Trame, to_vec, Message, DataType, DynOption, MessageOption, Check, Array};
-use model::unicode::Unicode;
-use model::error::{RdpResult, RdpError, RdpErrorKind, Error};
-use core::per;
+use crate::model::data::{Component, U32, U16, Trame, to_vec, Message, DataType, DynOption, MessageOption, Check, Array};
+use crate::model::unicode::Unicode;
+use crate::model::error::{RdpResult, RdpError, RdpErrorKind, Error};
+use crate::core::per;
 use std::io::{Cursor, Read};
 use std::collections::HashMap;
 
@@ -254,7 +254,7 @@ pub fn server_core_data() -> Component{
     ]
 }
 
-/// Client security releated to deprecated RDP security layer
+/// Client security related to deprecated RDP security layer
 /// https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-rdpbcgr/6b58e11e-a32b-4903-b736-339f3cfe46ec?redirectedfrom=MSDN
 pub fn client_security_data() -> Component {
     component![
